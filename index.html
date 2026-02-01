@@ -856,19 +856,8 @@
             }
 
             .scroll-hint {
-                position: relative !important;
-                bottom: auto !important;
-                margin-top: 25px;
-                /* Space it below the logo */
-                opacity: 1 !important;
-                /* Force visible */
-                color: #555 !important;
-                width: 100%;
-                /* Ensure full width for centering */
-                text-align: center;
-                /* Center the text */
-                font-size: 0.75rem !important;
-                /* Make it smaller */
+                display: none !important;
+                /* Remove on mobile */
             }
 
             /* Force Section Titles to be visible (no scroll wait) */
@@ -885,7 +874,8 @@
             }
 
             .work-details {
-                max-height: 800px !important;
+                max-height: none !important;
+                /* Allow full expansion for any content length */
                 /* Force open on mobile */
                 opacity: 1 !important;
                 padding-bottom: 30px !important;
