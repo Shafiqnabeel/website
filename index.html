@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flabbergast Animation</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- GLOBAL RESET --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Force the page to be off-white and full height */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #F9F9F9;
+            /* Off-white background */
+            color: #111111;
+            /* Dark text */
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- 1. THE OPENING LOADER (The Red Box Animation) --- */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            /* Ensures background is black while loading */
+            z-index: 9999;
+            /* Sits on top of everything */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .red-box {
+            /* Initial State: Small rounded square */
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background-color: #FFFFFF;
+            /* White */
+            position: relative;
+            /* Needed to contain the image inside */
+            overflow: hidden;
+            /* Hides the image parts that are outside the box */
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            /* Ensure it sits below text initially if needed, or handle via stacking context */
+        }
+
+        /* The background image starts HIDDEN inside the red box */
+        .bg-reveal-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* It must be large enough to cover the screen when the box expands */
+            min-width: 100vw;
+            min-height: 100vh;
+            object-fit: cover;
+            opacity: 0;
+            /* Invisible initially */
+        }
+
+        /* --- 2. HERO CONTENT (Hidden behind the loader initially) --- */
+        /* --- 2. HERO CONTENT (Now holding the Profile/About) --- */
+        .hero-section {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+            padding: 0 5vw;
+        }
+
+        .hero-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 50px;
+            opacity: 0;
+            /* Hidden until animation reveals it */
+            transform: translateY(30px);
+        }
+
+        .hero-text {
+            flex: 1;
+            color: #111;
+            /* Dark text for light bg */
+            text-align: left;
+        }
+
+        .hero-name {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 6rem;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-style: normal;
+            color: #000000;
+            letter-spacing: 5px;
+            text-transform: none;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            letter-spacing: 3px;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 500px;
+            color: #444;
+            /* Darker gray for readability */
+        }
+
+        .flag-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+            /* Space between name and flags */
+        }
+
+        .nationality-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            letter-spacing: 1px;
+            margin-right: 5px;
+        }
+
+        .flag-icon {
+            width: 40px;
+            /* Slightly larger width for rectangular look */
+            height: auto;
+            border-radius: 0;
+            /* Sharp corners, no circle */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .flag-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            cursor: help;
+        }
+
+        .flag-wrapper:hover .flag-icon {
+            transform: scale(1.1);
+        }
+
+        .country-name {
+            position: absolute;
+            top: 120%;
+            /* Below the flag */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #222;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        /* Tiny triangle for the tooltip */
+        .country-name::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #222 transparent;
+        }
+
+        .flag-wrapper:hover .country-name {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .hero-image-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .hero-image {
+            width: 400px;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 20px 20px 0px rgba(230, 34, 0, 0.5);
+            /* Offset stylized shadow */
+        }
+
+        .profile-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            /* Aligns logo to right of image */
+        }
+
+        .social-links {
+            margin-top: 30px;
+            /* Clearance for the image shadow */
+            padding-left: 10px;
+            /* Slight indent */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .linkedin-hint-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 15px;
+            opacity: 0;
+            /* Simple fade in animation */
+            animation: fadeInHint 1s ease-out 2s forwards;
+        }
+
+        .linkedin-hint-text {
+            font-size: 0.8rem;
+            color: #555;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hint-arrow {
+            width: 18px;
+            height: 18px;
+            stroke: #555;
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        @keyframes fadeInHint {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .social-icon {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            opacity: 0.8;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 50px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0;
+        }
+
+
+
+        /* --- 3. SEPARATE FULL PAGE SECTIONS --- */
+        .page-section {
+            min-height: 100vh;
+            padding: 100px 5vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        .experience-section {
+            background-color: #E5E5E5;
+            /* Light Grey */
+        }
+
+        .projects-section {
+            background-color: #F0F0F0;
+            /* Slightly different Off-White/Grey */
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .section-title {
+            font-size: 4rem;
+            color: #333;
+            margin-bottom: 50px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            opacity: 0;
+            /* Animated */
+            transform: translateY(30px);
+        }
+
+        .work-list {
+            width: 100%;
+        }
+
+        /* --- Nested Experience Accordion --- */
+        /* --- Nested Work Accordion (Experience & Projects) --- */
+        .work-item {
+            border-bottom: 1px solid #aaa;
+            /* Darker border for visibility */
+            opacity: 0;
+            /* For animation */
+            transform: translateY(30px);
+        }
+
+        .work-item:last-child {
+            border-bottom: none;
+        }
+
+        /* --- Connecting Line for Consecutive Roles --- */
+        .work-item.connected {
+            border-bottom: none;
+            /* No horizontal line between same company roles */
+            padding-bottom: 0;
+            position: relative;
+            /* For pseudo-element positioning */
+        }
+
+        /* The vertical line connecting to the NEXT item */
+        .work-item.connected::before {
+            content: '';
+            position: absolute;
+            top: 60px;
+            /* Start below the current logo */
+            left: 20px;
+            /* Center of the logo (assuming 40px width + padding) */
+            height: 100%;
+            width: 2px;
+            background-color: #d1d5db;
+            /* Light Grey */
+            z-index: 0;
+            transform: translateX(-50%);
+        }
+
+        /* Ensure the last item of a group has the normal separator if it's not the very last item in the list */
+        .work-item:not(.connected) {
+            border-bottom: 1px solid #aaa;
+        }
+
+        .work-item:last-child {
+            border-bottom: none;
+        }
+
+        .work-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            transition: background-color 0.2s ease;
+        }
+
+        .work-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .location {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Removed hover color change since it's not clickable anymore */
+
+        .work-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .company-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #333;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .company-logo:hover {
+            transform: scale(2.8);
+            /* Enlarge nicely */
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            /* Slight shape change to show more image */
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .work-details {
+            max-height: 0;
+            overflow: hidden;
+            /* Ultra smooth unified transition */
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            padding-left: 55px;
+            padding-bottom: 0;
+            /* Start at 0 to prevent jump */
+        }
+
+        .work-item.active .work-details {
+            max-height: 800px;
+            /* Ample height */
+            opacity: 1;
+            padding-bottom: 30px;
+        }
+
+        .work-details p {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+
+        /* List Styling within Accordion (kept for Projects) */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.5rem;
+            color: #555;
+            transition: padding-left 0.3s ease;
+        }
+
+        .list-item:hover {
+            padding-left: 20px;
+            color: #000;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        /* --- Language Section --- */
+        .languages-container {
+            display: flex;
+            gap: 25px;
+            margin-top: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .language-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            color: #333;
+            font-weight: 600;
+            /* Slightly bolder for emphasis */
+        }
+
+        .lang-flag {
+            width: 28px;
+            /* Size for visibility */
+            height: auto;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Project Mini Flags --- */
+        .mini-flag-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
+
+        .mini-flag {
+            width: 30px;
+            /* Small but visible */
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        /* Reuse flag-wrapper hover behavior for the mini flags */
+        .flag-wrapper:hover .mini-flag {
+            transform: scale(1.2);
+        }
+
+        .count-badge {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #555;
+            margin-left: 2px;
+        }
+
+        .wip-badge {
+            background-color: #ff9800;
+            /* Orange for WIP */
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        /* --- SKILLS SECTION --- */
+        .skills-instruction {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .skills-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .skill-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .skill-tab:hover,
+        .skill-tab.active {
+            opacity: 1;
+            transform: translateY(-5px);
+        }
+
+        .skill-tab .tab-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid transparent;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s;
+        }
+
+        .skill-tab.active .tab-logo {
+            border-color: #E62200;
+            /* Flabbergast Red highlight */
+        }
+
+        .skill-tab span {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .skills-display {
+            min-height: 200px;
+            position: relative;
+        }
+
+        .skills-list {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            animation: fadeInSkills 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .skills-list.active {
+            display: grid;
+        }
+
+        @keyframes fadeInSkills {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .skill-item {
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eee;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: default;
+        }
+
+        .skill-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .skill-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #444;
+            display: block;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- Skill Bar on Hover --- */
+        .skill-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .skill-item:hover .skill-bar-container {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .skill-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #E62200, #ff9800);
+            width: 0%;
+            /* JS will randomize this */
+            border-radius: 3px;
+            transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loader-wrapper">
+        <div class="red-box">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+                class="bg-reveal-image" alt="Background">
+        </div>
+    </div>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-container">
+                <div class="hero-text">
+                    <h1 class="hero-name">Shafiq Nabeel</h1>
+                    <div class="flag-container">
+                        <span class="nationality-label">Nationality:</span>
+                        <!-- Jordan Wrapper -->
+                        <div class="flag-wrapper">
+                            <img src="https://flagcdn.com/w80/jo.png" class="flag-icon" alt="Jordan Flag">
+                            <span class="country-name">Jordan</span>
+                        </div>
+                        <!-- Canada Wrapper -->
+                        <div class="flag-wrapper">
+                            <img src="https://flagcdn.com/w80/ca.png" class="flag-icon" alt="Canada Flag">
+                            <span class="country-name">Canada</span>
+                        </div>
+                    </div>
+                    <h2 class="hero-subtitle">About Me</h2>
+                    <p>
+                        Results-driven strategist with expertise in sales, logistics, and client services. A trilingual
+                        communicator dedicated to building strong, lasting relationships.
+                    </p>
+
+                    <div class="languages-container">
+                        <div class="language-item">
+                            <img src="https://flagcdn.com/w40/jo.png" class="lang-flag" alt="Arabic">
+                            <span>Arabic: Fluent</span>
+                        </div>
+                        <div class="language-item">
+                            <img src="https://flagcdn.com/w40/gb.png" class="lang-flag" alt="UK">
+                            <span>English: Fluent</span>
+                        </div>
+                        <div class="language-item">
+                            <img src="https://flagcdn.com/w40/es.png" class="lang-flag" alt="Spanish">
+                            <span>Spanish: Intermediate</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper">
+                    <div class="profile-group">
+                        <img src="./Faceshot.jpg" class="hero-image" alt="My Picture">
+                        <div class="social-links">
+                            <div class="linkedin-hint-wrapper">
+                                <span class="linkedin-hint-text">Check Out My Linkedin</span>
+                                <!-- Right Pointing Arrow -->
+                                <svg class="hint-arrow" viewBox="0 0 24 24">
+                                    <path d="M17 12H3M17 12L11 6M17 12L11 18" stroke="currentColor" />
+                                </svg>
+                            </div>
+                            <a href="https://www.linkedin.com/in/shafiqnabeel/" target="_blank">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3536/3536505.png" class="social-icon"
+                                    alt="LinkedIn">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Scroll Hint separate to stay at bottom -->
+            <div class="scroll-hint" style="position: absolute; bottom: 40px; opacity: 0; color: #444;">Scroll To
+                Explore</div>
+        </section>
+
+
+
+        <!-- EXPERIENCE SECTION -->
+        <section class="page-section experience-section" id="experience">
+            <div class="content-container">
+                <h2 class="section-title">Experience</h2>
+                <div class="work-list">
+                    <!-- Job 1 -->
+                    <!-- Job 1 -->
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./CHALHOUB.png" class="company-logo" alt="Chalhoub Group">
+                                <span class="company-name">Shipping and Transport Coordinator @ Chalhoub Group</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">September 2025 - Present</span>
+                                <span class="location">Dubai, United Arab Emirates</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Overseeing end-to-end shipping and transport operations to ensure on-time, compliant,
+                                and cost-efficient movement of luxury goods across regional and international markets.
+                            </p>
+                            <p>• Managing inbound and outbound shipments, including documentation, tracking, exception
+                                handling, and daily coordination with carriers and freight forwarders.</p>
+                            <p>• Ensuring full compliance with customs, airline, and international trade requirements.
+                            </p>
+                            <p>• Reviewing AWBs, Bills of Lading, invoices, and shipping documents with a strong focus
+                                on accuracy and completeness.</p>
+                            <p>• Collaborating with suppliers, warehouses, and internal teams to resolve delays, reduce
+                                errors, and improve service levels.</p>
+                            <p>• Monitoring carrier performance and supporting continuous improvements across the supply
+                                chain.</p>
+                            <p>• Contributing directly to a smooth, reliable flow of goods for Chalhoub Group’s
+                                portfolio of luxury brands.</p>
+                        </div>
+                    </div>
+
+                    <!-- Job 2 -->
+                    <div class="work-item connected">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./WUDUH.jpg" class="company-logo" alt="Wuduh">
+                                <span class="company-name">Tax Specialist @ Wuduh</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">August 2025 - September 2025</span>
+                                <span class="location">Amman, Jordan</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Identifying and connecting with clients seeking customized tax relief strategies.</p>
+                            <p>• Evaluating client financial and tax situations to deliver effective, compliant
+                                solutions.</p>
+                            <p>• Guiding clients through the tax relief process with clear, consultative support.</p>
+                            <p>• Presenting tailored solutions that drive client adoption and build long-term trust.</p>
+                            <p>• Achieving measurable results by reducing client tax liabilities while consistently
+                                meeting company targets.</p>
+                        </div>
+                    </div>
+
+                    <!-- Job 3 -->
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./WUDUH.jpg" class="company-logo" alt="Wuduh">
+                                <span class="company-name">Sales And Marketing Specialist @ Wuduh</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">March 2025 - August 2025</span>
+                                <span class="location">Amman, Jordan</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Prospecting and acquiring new clients to drive revenue growth in the debt consolidation
+                                sector.</p>
+                            <p>• Selling tailored debt consolidation solutions by assessing clients’ financial
+                                situations and offering strategic recommendations.</p>
+                            <p>• Driving deal closures through effective presentations, negotiations, and solution-based
+                                selling.</p>
+                            <p>• Analyzing market trends and customer needs to deliver tailored debt solutions.</p>
+                            <p>• Building and maintaining strong client relationships to encourage referrals and repeat
+                                business.</p>
+                            <p>• Consistently exceeding sales targets, earning recognition as a top performer.</p>
+                        </div>
+                    </div>
+
+                    <!-- Job 4 -->
+                    <div class="work-item connected">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./nabeelaw.jpg" class="company-logo" alt="Nabeel Law Offices">
+                                <span class="company-name">Legal Administrative and Marketing Assistant @ Nabeel Law
+                                    Offices</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">June 2024 - March 2025</span>
+                                <span class="location">Amman, Jordan</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Reviewed and revised contracts while collaborating with various departments to
+                                streamline the registration of new companies and modifications of existing companies,
+                                ensuring compliance with legal standards while organizing and maintaining legal
+                                documents for easy access and reference.</p>
+                            <p>• Conducted market research to identify potential corporate clients and business
+                                opportunities, analyzing their legal needs to tailor and promote the firm's services
+                                effectively.</p>
+                            <p>• Performed in-depth analysis of industry sectors and company needs to create customized
+                                outreach approaches, enhancing the firm's ability to secure new clients.</p>
+                            <p>• Worked effectively within a team of three interns to support the legal team across
+                                multiple projects, demonstrating strong teamwork and interpersonal skills to achieve
+                                common goals.</p>
+                            <p>• Conducted 3 weeks of hands-on training for my successor.</p>
+                            <p>• Provided post-departure support to ensure zero disruption.</p>
+                        </div>
+                    </div>
+
+                    <!-- Job 5: Legal Assistant Intern -->
+                    <div class="work-item connected">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./nabeelaw.jpg" class="company-logo" alt="Nabeel Law Offices">
+                                <span class="company-name">Legal Assistant Intern @ Nabeel Law Offices</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">May 2023 - September 2023</span>
+                                <span class="location">Amman, Jordan</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Organized and sorted legal documents.</p>
+                            <p>• Collaborated with a team of three interns to accomplish tasks and support the legal
+                                team in various projects, demonstrating effective teamwork and interpersonal skills.</p>
+                            <p>• Assisted lawyers in legal research.</p>
+                            <p>• Prepared comprehensive outlines for office meetings and meticulously documented meeting
+                                notes.</p>
+                        </div>
+                    </div>
+
+                    <!-- Job 6: Student Internship -->
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./nabeelaw.jpg" class="company-logo" alt="Nabeel Law Offices">
+                                <span class="company-name">Student Internship @ Nabeel Law Offices</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">June 2020 - August 2020</span>
+                                <span class="location">Amman, Jordan</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Shadowed and assisted lawyers in day-to-day activities, gaining practical insight into
+                                the legal profession.</p>
+                            <p>• Worked on private projects under the guidance of senior attorneys, demonstrating the
+                                ability to handle independent assignments.</p>
+                            <p>• Attended and actively participated in lectures covering different fields of legal
+                                practices, including: Companies Law, Labor Law, Intellectual Properties and Trade-Marks.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS SECTION -->
+        <section class="page-section projects-section" id="projects">
+            <div class="content-container">
+                <h2 class="section-title">Projects</h2>
+                <div class="work-list">
+                    <!-- Project 1: My First Build -->
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./CODE.webp" class="company-logo" alt="Code">
+                                <span class="company-name">My First Build: The Foundation <span class="wip-badge">Work
+                                        in Progress</span></span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">2026</span>
+                                <span class="location">Digital Space</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>This is where it starts. A self-initiated project to understand the mechanics behind the
+                                web. Built entirely from scratch with AI assistance, this site represents the first step
+                                in my journey to becoming digitally fluent.</p>
+                            <p>It stands as proof that with resourcefulness and the right tools, I can adapt to new
+                                challenges and build functional solutions from the ground up.</p>
+                        </div>
+                    </div>
+
+                    <!-- Project 2: MUN -->
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./MUN.webp" class="company-logo" alt="MUN">
+                                <span class="company-name">Model United Nations (MUN) Delegate x5</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="location">Countries participated in:</span>
+                                <div class="mini-flag-container">
+                                    <!-- Netherlands -->
+                                    <div class="flag-wrapper">
+                                        <img src="https://flagcdn.com/w40/nl.png" class="mini-flag" alt="Netherlands">
+                                        <span class="country-name">The Hague, Netherlands</span>
+                                    </div>
+                                    <!-- Italy -->
+                                    <div class="flag-wrapper">
+                                        <img src="https://flagcdn.com/w40/it.png" class="mini-flag" alt="Italy">
+                                        <span class="country-name">Milano, Italy</span>
+                                    </div>
+                                    <!-- Turkey -->
+                                    <div class="flag-wrapper">
+                                        <img src="https://flagcdn.com/w40/tr.png" class="mini-flag" alt="Turkey">
+                                        <span class="country-name">Istanbul, Turkiye</span>
+                                    </div>
+                                    <!-- Jordan -->
+                                    <div class="flag-wrapper">
+                                        <img src="https://flagcdn.com/w40/jo.png" class="mini-flag" alt="Jordan">
+                                        <span class="country-name">Amman, Jordan</span>
+                                    </div>
+                                    <span class="count-badge">x2</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>• Participated in 5 Model United Nations conferences, including three international
+                                conferences and two local conferences.</p>
+                            <p>• Represented countries such as the USA, Yemen, Cuba, Turkiye and Libya.</p>
+                            <p>• Gained experience in diplomacy, public speaking, negotiation, and international
+                                relations through active engagement in committee discussions and resolution drafting.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Project 2: SOS -->
+                    <div class="work-item">
+                        <div class="work-header">
+                            <div class="work-left">
+                                <img src="./SOS.jpg" class="company-logo" alt="SOS Children's Villages">
+                                <span class="company-name">Math Facilitator and Mentor @ SOS Children's Villages
+                                    Jordan</span>
+                            </div>
+                            <div class="work-right">
+                                <span class="year">Volunteering</span>
+                                <span class="location">Amman, Jordan</span>
+                            </div>
+                        </div>
+                        <div class="work-details">
+                            <p>As a Math Educator at SOS Children's Villages, I designed and delivered math lessons
+                                tailored to children's unique learning needs. My approach focused on simplifying complex
+                                concepts into engaging, accessible lessons, while ensuring a supportive learning
+                                environment.</p>
+                            <p>I assessed the students' progress through quizzes before and after each session, showing
+                                significant improvements in their understanding and performance.</p>
+                            <p>By adapting my teaching style, I ensured that each child received the attention and
+                                guidance necessary to succeed, contributing to both their academic growth and confidence
+                                in math.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS SECTION -->
+        <section class="page-section skills-section" id="skills">
+            <div class="content-container">
+                <h2 class="section-title">Skills</h2>
+                <p class="skills-instruction">Click on any institution to see the set of skills acquired from there.</p>
+
+                <div class="skills-tabs">
+                    <div class="skill-tab active" onclick="switchSkills('chalhoub', this)">
+                        <img src="./CHALHOUB.png" class="tab-logo" alt="Chalhoub">
+                        <span>Chalhoub Group</span>
+                    </div>
+                    <div class="skill-tab" onclick="switchSkills('wuduh', this)">
+                        <img src="./WUDUH.jpg" class="tab-logo" alt="Wuduh">
+                        <span>Wuduh</span>
+                    </div>
+                    <div class="skill-tab" onclick="switchSkills('nabeel', this)">
+                        <img src="./nabeelaw.jpg" class="tab-logo" alt="Nabeel">
+                        <span>Nabeel Law Offices</span>
+                    </div>
+                    <div class="skill-tab" onclick="switchSkills('concordia', this)">
+                        <img src="./concordia.jpg" class="tab-logo" alt="Concordia">
+                        <span>Concordia University</span>
+                    </div>
+                </div>
+
+                <div class="skills-display">
+                    <!-- Chalhoub Skills -->
+                    <div class="skills-list active" id="chalhoub">
+                        <div class="skill-item"><span class="skill-name">Airway Bill (AWB) & BL Management</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">International Trade Regulations</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Regional & International Markets</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Supply Chain Optimization</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Inventory & Warehouse Coordination</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Customs & Regulatory Compliance</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wuduh Skills -->
+                    <div class="skills-list" id="wuduh">
+                        <div class="skill-item"><span class="skill-name">Consultative Selling</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Microsoft Word & Excel</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Negotiation</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Strategy Execution</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">CRM Management</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">New Client Acquisitions</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Direct Sales</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Financial Advisory</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Deal Execution</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Market Research</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Persuasive Speaking</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nabeel Skills -->
+                    <div class="skills-list" id="nabeel">
+                        <div class="skill-item"><span class="skill-name">Corporate Registration</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Entity Management</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Legal Research & Analysis</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Client-Focused Advisory</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Contract Drafting</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Document Management</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Interpersonal & Teamwork</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Clear Communications</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Industry Analysis</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Concordia Skills -->
+                    <div class="skills-list" id="concordia">
+                        <div class="skill-item"><span class="skill-name">Academic Research</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Critical Thinking</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Public Speaking</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Project Management</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Intercultural Communication</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <!-- New Skills -->
+                        <div class="skill-item"><span class="skill-name">Teamwork</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Time Management</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Multitasking</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Microsoft Word & Excel</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item"><span class="skill-name">Social Media</span>
+                            <div class="skill-bar-container">
+                                <div class="skill-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function switchSkills(id, tabElement) {
+            // Remove active from all lists and tabs
+            document.querySelectorAll('.skills-list').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.skill-tab').forEach(el => el.classList.remove('active'));
+
+            // Add active to selected
+            document.getElementById(id).classList.add('active');
+            tabElement.classList.add('active');
+
+            // Re-randomize bars for the new active tab
+            randomizeBars();
+        }
+
+        function randomizeBars() {
+            document.querySelectorAll('.skill-bar-fill').forEach(bar => {
+                const randomWidth = Math.floor(Math.random() * (100 - 70 + 1)) + 70; // 70-100%
+                bar.style.width = randomWidth + '%';
+            });
+        }
+
+        // Wait for the window to load completely so images are ready
+        window.onload = () => {
+            randomizeBars(); // Initial randomization
+
+            gsap.registerPlugin(ScrollTrigger);
+            const tl = gsap.timeline();
+
+            // --- PART 1: OPENING SEQUENCE ---
+            // 1. Expand the small square to fill the screen
+            tl.to(".red-box", {
+                duration: 1.0,
+                width: "100%",
+                height: "100%",
+                borderRadius: "0px",
+                ease: "power4.inOut",
+                delay: 0.4
+            })
+                // 2. Fade out the loader wrapper to reveal the off-white background
+                .to(".loader-wrapper", {
+                    duration: 0.8,
+                    opacity: 0,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        gsap.set(".loader-wrapper", { display: "none" });
+                    }
+                })
+
+                // 3. Reveal the About Me Content
+                .to([".hero-container", ".scroll-hint"], {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    stagger: 0.2,
+                    ease: "power3.out"
+                }, "-=0.2");
+
+
+            // --- PART 2: SCROLL ANIMATIONS for Experience & Projects ---
+
+            // Animate Experience Section Title
+            gsap.to(".experience-section .section-title", {
+                scrollTrigger: {
+                    trigger: ".experience-section",
+                    start: "top 70%",
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            });
+
+            // Animate Projects Section Title
+            gsap.to(".projects-section .section-title", {
+                scrollTrigger: {
+                    trigger: ".projects-section",
+                    start: "top 70%",
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            });
+
+            // Iterate through every work-item for individual animations
+            gsap.utils.toArray(".work-item").forEach(item => {
+
+                // Unified Entrance & Expansion
+                gsap.to(item, {
+                    scrollTrigger: {
+                        trigger: item,
+                        start: "top 85%", // Smooth entry point
+                        toggleActions: "play none none reverse"
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 1.5, // Very relaxed and smooth
+                    ease: "power4.out", // Deep ease out for seamless stop
+                    onStart: () => {
+                        // Trigger CSS expansion at the exact same moment
+                        item.classList.add("active");
+                    }
+                });
+            });
+        };
+    </script>
+</body>
+
+</html>
