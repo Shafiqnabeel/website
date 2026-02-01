@@ -715,6 +715,134 @@
             border-radius: 3px;
             transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
         }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media screen and (max-width: 768px) {
+
+            /* Global Adjustments */
+            .page-section {
+                padding: 60px 20px;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+                margin-bottom: 30px;
+            }
+
+            /* 1. Hero Section */
+            .hero-section {
+                padding: 100px 20px 40px;
+                align-items: flex-start;
+            }
+
+            .hero-container {
+                flex-direction: column;
+                gap: 40px;
+            }
+
+            .hero-text {
+                width: 100%;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-name {
+                font-size: 3.5rem;
+                line-height: 1.1;
+                letter-spacing: 2px;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .hero-text p {
+                max-width: 100%;
+                text-align: center;
+                font-size: 1rem;
+            }
+
+            .flag-container {
+                justify-content: center;
+            }
+
+            .hero-image-wrapper {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-image {
+                width: 100%;
+                max-width: 320px;
+                height: auto;
+                aspect-ratio: 4/5;
+                box-shadow: 10px 10px 0px rgba(230, 34, 0, 0.5);
+            }
+
+            .profile-group {
+                align-items: center;
+            }
+
+            .social-links {
+                justify-content: center;
+                padding-left: 0;
+            }
+
+            /* 2. Experience & Projects */
+            .work-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .work-right {
+                align-items: flex-start;
+                text-align: left;
+                width: 100%;
+            }
+
+            .work-details {
+                padding-left: 15px;
+                /* Reduced from 55px but kept subtle indent */
+            }
+
+            /* Hide the connecting line on mobile for cleaner look */
+            .work-item.connected::before {
+                display: none;
+            }
+
+            .mini-flag-container {
+                justify-content: flex-start;
+                /* Left align mini flags on mobile */
+                flex-wrap: wrap;
+            }
+
+            /* 3. Skills */
+            .skills-tabs {
+                gap: 20px;
+            }
+
+            .skill-tab .tab-logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            .skill-tab span {
+                font-size: 0.85rem;
+            }
+
+            .skills-list {
+                grid-template-columns: 1fr;
+            }
+
+            .wip-badge {
+                display: inline-block;
+                margin-top: 5px;
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 
