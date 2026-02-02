@@ -1028,26 +1028,20 @@
             }
 
             .click-hint-wrapper {
-                display: none !important;
+                left: -20px;
+                top: -60px;
+                transform: rotate(-10deg) scale(0.8);
+                display: flex !important;
+                /* Force show if it was hidden globaly */
             }
 
             .flip-card {
                 width: 100%;
                 max-width: 320px;
-                height: 500px;
-                /* Increased height to fit facts */
+                height: 400px;
             }
 
-            .fun-facts-container {
-                padding: 15px;
-                /* Reduced padding for mobile */
-            }
 
-            .fun-fact-list li {
-                font-size: 0.9rem;
-                /* Slightly smaller text */
-                margin-bottom: 8px;
-            }
 
             .flip-card-inner {
                 box-shadow: 10px 10px 0px rgba(230, 34, 0, 0.5);
