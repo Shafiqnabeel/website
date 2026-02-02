@@ -1025,17 +1025,18 @@
             }
 
             .click-hint-wrapper {
-                left: -20px;
-                top: -60px;
-                transform: rotate(-10deg) scale(0.8);
-                display: flex !important;
-                /* Force show if it was hidden globaly */
+                display: none !important;
+                /* Hide hint on mobile */
             }
 
             .flip-card {
                 width: 100%;
-                max-width: 320px;
-                height: 400px;
+                max-width: 360px;
+                /* Slightly wider */
+                height: 500px;
+                /* Bigger photo */
+                pointer-events: none;
+                /* Disable click/flip */
             }
 
 
