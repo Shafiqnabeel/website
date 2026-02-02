@@ -471,12 +471,15 @@
         }
 
         /* --- Cat Tooltip Styling --- */
+        /* --- Cat Tooltip Styling --- */
         .cat-tooltip-wrapper {
             position: relative;
             cursor: pointer;
             color: #E62200;
             font-weight: 700;
             text-decoration: underline;
+            /* Ensure text stays on top */
+            z-index: 15;
         }
 
         .cat-popup {
@@ -501,6 +504,28 @@
             opacity: 1;
             transform: translateX(-50%) scale(1);
             pointer-events: auto;
+        }
+
+        /* Mobile adjustment for popups to break out of containers */
+        @media screen and (max-width: 768px) {
+            .cat-tooltip-wrapper .cat-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                bottom: auto;
+                width: 250px;
+                /* Larger separate popup */
+                transform: translate(-50%, -50%) scale(0.8);
+                z-index: 9999;
+                /* Highest priority */
+                box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.7);
+                /* Dim background */
+            }
+
+            .cat-tooltip-wrapper:hover .cat-popup,
+            .cat-tooltip-wrapper:active .cat-popup {
+                transform: translate(-50%, -50%) scale(1);
+            }
         }
 
         @keyframes floatHint {
@@ -1000,15 +1025,25 @@
             }
 
             .click-hint-wrapper {
-                left: -20px;
-                top: -60px;
-                transform: rotate(-10deg) scale(0.8);
+                display: none !important;
             }
 
             .flip-card {
                 width: 100%;
                 max-width: 320px;
-                height: 400px;
+                height: 500px;
+                /* Increased height to fit facts */
+            }
+
+            .fun-facts-container {
+                padding: 15px;
+                /* Reduced padding for mobile */
+            }
+
+            .fun-fact-list li {
+                font-size: 0.9rem;
+                /* Slightly smaller text */
+                margin-bottom: 8px;
             }
 
             .flip-card-inner {
